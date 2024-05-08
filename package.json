@@ -1,14 +1,17 @@
 {
-  "name": "splittypie",
+  "name": "pwa",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "vite src",
+    "build": "vite build src",
     "preview": "vite preview"
   },
   "devDependencies": {
     "vite": "^5.2.0"
+  },
+  "dependencies": {
+    "firebase": "^10.11.1"
   }
 }

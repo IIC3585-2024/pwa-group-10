@@ -1,7 +1,16 @@
 import "./style.css";
 
-document.querySelector("#app").innerHTML = `
-  <div>
-    Splittypie
-  </div>
-`;
+loadLandingPage();
+
+function loadLandingPage() {
+  const el = document.querySelector("#app");
+  if (el === null) {
+    return;
+  }
+
+  el.innerHTML = `
+    <div>
+      Splittypie
+    </div>
+  `;
+}
