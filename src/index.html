@@ -2,12 +2,27 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite App</title>
+    <title>Splittypie</title>
+    <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
-    <div id="app"></div>
+    <div id="app">
+      <div>
+        <button id="sign-in">Iniciar Sesión con Google</button>
+        <button id="sign-out" hidden>Cerrar Sesión</button>
+      </div>
+      <div>
+        <h1>Splittypie</h1>
+      </div>
+      <div id="content" hidden>
+        <select name="event" id="event-selector">
+          <option value="default">Seleccione un evento</option>
+        </select>
+        <button id="create-event">Nuevo Evento</button>
+        <div>Información de evento</div>
+      </div>
+    </div>
     <script type="module" src="/main.js"></script>
   </body>
 </html>

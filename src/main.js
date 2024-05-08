@@ -1,16 +1,14 @@
-import "./style.css";
+import { auth } from "./firebase";
+import { onAuthStateChanged } from "firebase/auth";
 
-loadLandingPage();
+import "./auth";
 
-function loadLandingPage() {
-  const el = document.querySelector("#app");
-  if (el === null) {
-    return;
+const content = document.getElementById("content");
+
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    content.hidden = false;
+  } else {
+    content.hidden = true;
   }
-
-  el.innerHTML = `
-    <div>
-      Splittypie
-    </div>
-  `;
-}
+});
