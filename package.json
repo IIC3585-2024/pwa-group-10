@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite src",
     "build": "vite build src",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy": "vite build src && firebase deploy --only hosting"
   },
   "devDependencies": {
     "vite": "^5.2.0"
