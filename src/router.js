@@ -1,5 +1,6 @@
 import landingPage from "./pages/landing";
 import loginPage from "./pages/login";
+import eventPage from "./pages/event";
 
 const routes = {
   404: {
@@ -8,6 +9,7 @@ const routes = {
   },
   "/": landingPage,
   "/login": loginPage,
+  "/event": eventPage,
 };
 
 function navigateTo(event) {

@@ -1,21 +1,18 @@
-// Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+import { getDatabase } from "firebase/database";
 
-// Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyABfLu3f-Lmngcvka3i8-XTjdZOEuFDzQY",
   authDomain: "splittypie-iic3585.firebaseapp.com",
   projectId: "splittypie-iic3585",
-  storageBucket: "splittypie-iic3585.appspot.com",
   messagingSenderId: "492776923604",
   appId: "1:492776923604:web:120d57fe386f0e4ad13641",
+  databaseURL: "https://splittypie-iic3585-default-rtdb.firebaseio.com",
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-
 const auth = getAuth(app);
-export { auth };
+const db = getDatabase(app);
+
+export { auth, db };

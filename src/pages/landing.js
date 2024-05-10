@@ -21,15 +21,20 @@ const html = `
 function setupPage() {
   const content = document.getElementById("content");
   const openLoginPageButton = document.getElementById("open-login-page");
-  const signOutButton = document.getElementById("sign-out");
 
   openLoginPageButton?.addEventListener("click", () => {
     document.location.href = "/login";
   });
+  const signOutButton = document.getElementById("sign-out");
 
   signOutButton?.addEventListener("click", () => {
     console.log("sign out clicked");
     signOut(auth);
+  });
+
+  const newEventButton = document.getElementById("create-event");
+  newEventButton?.addEventListener("click", () => {
+    document.location.href = "/event";
   });
 
   onAuthStateChanged(auth, (user) => {
