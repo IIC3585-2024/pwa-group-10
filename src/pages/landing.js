@@ -73,6 +73,7 @@ async function checkIfUserIsLoggedIn() {
 
   if (userStore.uid) {
     await getEvents();
+    redirectIfEventNotFromUser();
   }
 }
 
@@ -157,8 +158,17 @@ function checkUrlParams() {
       return;
     }
   }
+}
 
-  // navigateTo("/who-are-you");
+function redirectIfEventNotFromUser() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const eventId = urlParams.get("event");
+
+  if (!eventId) return;
+  console.log("eventsStore", eventsStore.events);
+  if (!eventsStore.events[eventId] && userStore.uid) {
+    navigateTo(`/who-are-you?${urlParams.toString()}`);
+  }
 }
 
 function displayChosenEventInfo() {
