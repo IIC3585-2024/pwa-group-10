@@ -1,3 +1,6 @@
+import { auth } from "./firebase";
+import { onAuthStateChanged } from "firebase/auth";
+
 function store(data = {}, name = "store") {
   function emit(type, detail) {
     // Create a new event
@@ -43,7 +46,8 @@ function store(data = {}, name = "store") {
 const userStore = store({ uid: null, events: [] }, "user");
 const eventsStore = store({}, "events");
 
-export default {
-  userStore,
-  eventsStore,
-};
+onAuthStateChanged(auth, (user) => {
+  userStore.uid = user ? user.uid : null;
+});
+
+export { userStore, eventsStore };

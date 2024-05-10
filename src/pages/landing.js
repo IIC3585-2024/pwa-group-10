@@ -1,7 +1,8 @@
 import { ref, get, child } from "firebase/database";
-import { onAuthStateChanged, signOut } from "firebase/auth";
+import { signOut } from "firebase/auth";
 
 import { auth, db } from "../firebase";
+import { userStore } from "../store";
 import navigateTo from "../router";
 
 const html = `
@@ -22,15 +23,24 @@ const html = `
 `;
 
 function setupPage() {
-  const content = document.getElementById("content");
-  const openLoginPageButton = document.getElementById("open-login-page");
   let events = {};
 
+  checkIfUserIsLoggedIn();
+  document.addEventListener("user", async () => {
+    await checkIfUserIsLoggedIn();
+  });
+
+  // checkEvents();
+  // document.addEventListener("events", () => {
+  //   checkEvents();
+  // });
+
+  const openLoginPageButton = document.getElementById("open-login-page");
   openLoginPageButton?.addEventListener("click", () => {
     navigateTo("/login");
   });
-  const signOutButton = document.getElementById("sign-out");
 
+  const signOutButton = document.getElementById("sign-out");
   signOutButton?.addEventListener("click", () => {
     signOut(auth);
   });
@@ -54,22 +64,40 @@ function setupPage() {
     navigateTo(`/?${urlParams.toString()}`);
   });
 
-  onAuthStateChanged(auth, async (user) => {
-    if (user) {
-      openLoginPageButton.hidden = true;
-      signOutButton.hidden = false;
-      content.hidden = false;
-      events = await getEvents();
-      changeSelectOptions(events);
-      checkUrlParams();
-    } else {
-      console.log("not found user");
-      openLoginPageButton.hidden = false;
-      signOutButton.hidden = true;
-      content.hidden = true;
-    }
-  });
+  // onAuthStateChanged(auth, async (user) => {
+  //   if (user) {
+  //     console.log("user found");
+  //     userStore.uid = user.uid;
+  //     events = await getEvents();
+  //     changeSelectOptions(events);
+  //     checkUrlParams();
+  //   } else {
+  //     console.log("not found user");
+  //     userStore.uid = null;
+  //   }
+  // });
 }
+
+async function checkIfUserIsLoggedIn() {
+  const content = document.getElementById("content");
+  const openLoginPageButton = document.getElementById("open-login-page");
+  const signOutButton = document.getElementById("sign-out");
+
+  if (userStore.uid) {
+    openLoginPageButton.hidden = true;
+    signOutButton.hidden = false;
+    content.hidden = false;
+    const events = await getEvents();
+    changeSelectOptions(events);
+    checkUrlParams();
+  } else {
+    openLoginPageButton.hidden = false;
+    signOutButton.hidden = true;
+    content.hidden = true;
+  }
+}
+
+function checkEvents() {}
 
 async function getEvents() {
   const userId = auth.currentUser.uid;

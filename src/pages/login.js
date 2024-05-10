@@ -1,5 +1,7 @@
+import { signInWithRedirect, getRedirectResult, GoogleAuthProvider } from "firebase/auth";
+
 import { auth } from "../firebase.js";
-import { signInWithRedirect, getRedirectResult, GoogleAuthProvider, onAuthStateChanged } from "firebase/auth";
+import { userStore } from "../store";
 import navigateTo from "../router.js";
 
 const html = `
@@ -9,21 +11,15 @@ const html = `
   <div>
     <button id="sign-in">Iniciar Sesión con Google</button>
   </div>
-  <div>
-    <div>Crear Nueva Cuenta</div>
-    <div>Iniciar Sesión</div>
-  </div>
 `;
 
 function setupPage() {
   const signInButton = document.getElementById("sign-in");
   signInButton?.addEventListener("click", tryToSignIn);
 
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      console.log("there is user, redirecting");
-      navigateTo("/");
-    }
+  checkIfUserIsLoggedIn();
+  document.addEventListener("user", async () => {
+    checkIfUserIsLoggedIn();
   });
 
   getRedirectResult(auth)
@@ -50,6 +46,12 @@ function setupPage() {
   async function tryToSignIn() {
     console.log("Sign in clicked");
     await signInWithRedirect(auth, new GoogleAuthProvider());
+    navigateTo("/");
+  }
+}
+
+function checkIfUserIsLoggedIn() {
+  if (userStore.uid) {
     navigateTo("/");
   }
 }
