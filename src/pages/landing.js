@@ -7,26 +7,27 @@ import { userStore, eventsStore } from "../store";
 import navigateTo from "../router";
 
 const html = `
-  <div>
-    <button id="open-login-page">Iniciar Sesión</button>
-    <button id="sign-out" hidden>Cerrar Sesión</button>
-  </div>
-  <div>
-    <h1>Splittypie</h1>
-  </div>
-  <div id="content" hidden>
-    <select name="event" id="event-selector">
-      <option value="default">Seleccione un evento</option>
-    </select>
-    <button id="create-event">Nuevo Evento</button>
-    <div>Información de evento</div>
-  </div>
+<div>
+  <button id="open-login-page">Iniciar Sesión</button>
+  <button id="sign-out" hidden>Cerrar Sesión</button>
+</div>
+<div>
+  <h1>Splittypie</h1>
+</div>
+<div id="content" hidden>
+  <select name="event" id="event-selector">
+    <option value="default">Seleccione un evento</option>
+  </select>
+  <button id="create-event">Nuevo Evento</button>
+  <br />
+
+  <h3 id="event-name"></h3>
+  <div id="event-balance"></div>
+  <div id="settle-debts"></div>
+</div>
 `;
 
 function setupPage() {
-  console.log("userStore on setup", userStore);
-  console.log("eventsStore on setup", eventsStore);
-
   checkIfUserIsLoggedIn();
   document.addEventListener("user", async () => {
     await checkIfUserIsLoggedIn();
@@ -143,17 +144,58 @@ function checkUrlParams() {
   const urlParams = new URLSearchParams(window.location.search);
   const eventId = urlParams.get("event");
 
-  if (!eventId) return;
+  if (!eventId) {
+    displayChosenEventInfo();
+    return;
+  }
 
   const eventSelector = document.getElementById("event-selector");
   for (const option of eventSelector.options) {
     if (option.value === eventId) {
       option.selected = true;
+      displayChosenEventInfo();
       return;
     }
   }
 
   // navigateTo("/who-are-you");
+}
+
+function displayChosenEventInfo() {
+  const eventSelector = document.getElementById("event-selector");
+  const eventId = eventSelector.value;
+
+  const eventName = document.getElementById("event-name");
+  console.log("eventId", eventId);
+  if (eventId === "default") {
+    eventName.innerHTML = "Choose an event";
+    return;
+  }
+
+  const event = eventsStore.events[eventId];
+  if (!event) return;
+
+  eventName.innerText = event.name;
+
+  const eventBalance = document.getElementById("event-balance");
+
+  const balanceTitle = document.createElement("h4");
+  balanceTitle.innerHTML = "Individual Balance";
+  eventBalance.appendChild(balanceTitle);
+
+  event.participants.forEach((participant) => {
+    const participantBalance = document.createElement("p");
+    participantBalance.innerHTML = `${participant.name}: $${participant.balance}`;
+    eventBalance.appendChild(participantBalance);
+  });
+
+  // const settleDebts = document.getElementById("settle-debts");
+  // settleDebts.innerHTML = `
+  //   <h3>Debts:</h3>
+  //   <ul>
+  //     ${event.debts.map((debt) => `<li>${debt.from} le debe a ${debt.to} $${debt.amount}</li>`).join("")}
+  //   </ul>
+  // `;
 }
 
 export default {
