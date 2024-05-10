@@ -1,4 +1,5 @@
-import { auth } from "../firebase";
+import { auth, db } from "../firebase";
+import { ref, get, child } from "firebase/database";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 
 const html = `
@@ -21,6 +22,7 @@ const html = `
 function setupPage() {
   const content = document.getElementById("content");
   const openLoginPageButton = document.getElementById("open-login-page");
+  let events = {};
 
   openLoginPageButton?.addEventListener("click", () => {
     document.location.href = "/login";
@@ -37,8 +39,10 @@ function setupPage() {
     document.location.href = "/event";
   });
 
-  onAuthStateChanged(auth, (user) => {
+  onAuthStateChanged(auth, async (user) => {
     if (user) {
+      events = await getEvents();
+      changeSelectOptions(events);
       openLoginPageButton.hidden = true;
       signOutButton.hidden = false;
       content.hidden = false;
@@ -47,6 +51,42 @@ function setupPage() {
       signOutButton.hidden = true;
       content.hidden = true;
     }
+  });
+}
+
+async function getEvents() {
+  const userId = auth.currentUser.uid;
+
+  const dbRef = ref(db);
+
+  const userEventsSnap = await get(child(dbRef, `users/${userId}/events`));
+  const userEvents = userEventsSnap.val() || {};
+
+  const promises = [];
+  Object.keys(userEvents).forEach((eventKey) => {
+    promises.push(get(child(dbRef, `events/${eventKey}`)));
+  });
+
+  const events = {};
+  const eventsPromises = await Promise.all(promises);
+  eventsPromises.forEach((eventSnap) => {
+    const event = eventSnap.val();
+    events[eventSnap.key] = event;
+  });
+
+  return events;
+}
+
+function changeSelectOptions(events) {
+  const eventSelector = document.getElementById("event-selector");
+  eventSelector.innerHTML = "<option value='default'>Seleccione un evento</option>";
+
+  Object.keys(events).forEach((eventId) => {
+    const event = events[eventId];
+    const option = document.createElement("option");
+    option.value = eventId;
+    option.innerText = event.name;
+    eventSelector.appendChild(option);
   });
 }
 
