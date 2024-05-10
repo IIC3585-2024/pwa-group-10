@@ -1,5 +1,6 @@
 import { auth } from "../firebase.js";
 import { signInWithRedirect, getRedirectResult, GoogleAuthProvider, onAuthStateChanged } from "firebase/auth";
+import navigateTo from "../router.js";
 
 const html = `
   <div>
@@ -21,7 +22,7 @@ function setupPage() {
   onAuthStateChanged(auth, (user) => {
     if (user) {
       console.log("there is user, redirecting");
-      document.location.href = "/";
+      navigateTo("/");
     }
   });
 
@@ -49,7 +50,7 @@ function setupPage() {
   async function tryToSignIn() {
     console.log("Sign in clicked");
     await signInWithRedirect(auth, new GoogleAuthProvider());
-    document.location.href = "/";
+    navigateTo("/");
   }
 }
 

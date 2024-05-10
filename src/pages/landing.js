@@ -1,6 +1,8 @@
-import { auth, db } from "../firebase";
 import { ref, get, child } from "firebase/database";
 import { onAuthStateChanged, signOut } from "firebase/auth";
+
+import { auth, db } from "../firebase";
+import navigateTo from "../router";
 
 const html = `
   <div>
@@ -25,28 +27,43 @@ function setupPage() {
   let events = {};
 
   openLoginPageButton?.addEventListener("click", () => {
-    document.location.href = "/login";
+    navigateTo("/login");
   });
   const signOutButton = document.getElementById("sign-out");
 
   signOutButton?.addEventListener("click", () => {
-    console.log("sign out clicked");
     signOut(auth);
   });
 
   const newEventButton = document.getElementById("create-event");
   newEventButton?.addEventListener("click", () => {
-    document.location.href = "/event";
+    navigateTo("/event");
+  });
+
+  const eventSelector = document.getElementById("event-selector");
+  eventSelector.addEventListener("change", (event) => {
+    const value = event.target.value;
+    if (value === "default") {
+      navigateTo("/");
+      return;
+    }
+
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    urlParams.set("event", value);
+    navigateTo(`/?${urlParams.toString()}`);
   });
 
   onAuthStateChanged(auth, async (user) => {
     if (user) {
-      events = await getEvents();
-      changeSelectOptions(events);
       openLoginPageButton.hidden = true;
       signOutButton.hidden = false;
       content.hidden = false;
+      events = await getEvents();
+      changeSelectOptions(events);
+      checkUrlParams();
     } else {
+      console.log("not found user");
       openLoginPageButton.hidden = false;
       signOutButton.hidden = true;
       content.hidden = true;
@@ -88,6 +105,23 @@ function changeSelectOptions(events) {
     option.innerText = event.name;
     eventSelector.appendChild(option);
   });
+}
+
+function checkUrlParams() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const eventId = urlParams.get("event");
+
+  if (!eventId) return;
+
+  const eventSelector = document.getElementById("event-selector");
+  for (const option of eventSelector.options) {
+    if (option.value === eventId) {
+      option.selected = true;
+      return;
+    }
+  }
+
+  // navigateTo("/who-are-you");
 }
 
 export default {

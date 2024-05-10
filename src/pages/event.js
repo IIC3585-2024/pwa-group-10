@@ -1,5 +1,6 @@
 import { ref, push, set } from "firebase/database";
 import { auth, db } from "../firebase";
+import navigateTo from "../router";
 
 const html = `
 <h1>Create Event</h1>
@@ -50,7 +51,7 @@ function setupPage() {
 
   const cancelButton = document.getElementById("cancel-button");
   cancelButton?.addEventListener("click", () => {
-    document.location.href = "/";
+    navigateTo("/");
   });
 }
 
@@ -105,7 +106,7 @@ async function createEvent(e) {
   const userNewEventRef = ref(db, `users/${userId}/events/${savedEvent.key}`);
   await set(userNewEventRef, true);
 
-  document.location.href = "/";
+  navigateTo("/");
 }
 
 export default {

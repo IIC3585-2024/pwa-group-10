@@ -12,10 +12,8 @@ const routes = {
   "/event": eventPage,
 };
 
-function navigateTo(event) {
-  event = event || window.event;
-  event.preventDefault();
-  window.history.pushState({}, "", event.target.href);
+function navigateTo(href) {
+  window.history.pushState({}, "", href);
   handleLocation();
 }
 
@@ -30,3 +28,5 @@ window.onpopstate = handleLocation;
 window.route = navigateTo;
 
 handleLocation();
+
+export default navigateTo;
