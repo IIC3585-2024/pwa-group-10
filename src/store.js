@@ -17,13 +17,6 @@ function store(data = {}, name = "store") {
   function handler(name, data) {
     return {
       get: function (obj, prop) {
-        if (prop === "_isProxy") return true;
-        if (
-          ["object", "array"].includes(Object.prototype.toString.call(obj[prop]).slice(8, -1).toLowerCase()) &&
-          !obj[prop]._isProxy
-        ) {
-          obj[prop] = new Proxy(obj[prop], handler(name, data));
-        }
         return obj[prop];
       },
       set: function (obj, prop, value) {
@@ -43,11 +36,15 @@ function store(data = {}, name = "store") {
   return new Proxy(data, handler(name, data));
 }
 
-const userStore = store({ uid: null, events: [] }, "user");
-const eventsStore = store({}, "events");
+const userStore = store({ uid: null }, "user");
+const eventsStore = store({ events: {} }, "events");
 
 onAuthStateChanged(auth, (user) => {
+  console.log("onAuthStateChanged", user);
   userStore.uid = user ? user.uid : null;
+  if (!userStore.uid) {
+    eventsStore.events = {};
+  }
 });
 
 export { userStore, eventsStore };

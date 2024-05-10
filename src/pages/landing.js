@@ -1,8 +1,9 @@
 import { ref, get, child } from "firebase/database";
 import { signOut } from "firebase/auth";
+import _ from "lodash";
 
 import { auth, db } from "../firebase";
-import { userStore } from "../store";
+import { userStore, eventsStore } from "../store";
 import navigateTo from "../router";
 
 const html = `
@@ -23,17 +24,18 @@ const html = `
 `;
 
 function setupPage() {
-  let events = {};
+  console.log("userStore on setup", userStore);
+  console.log("eventsStore on setup", eventsStore);
 
   checkIfUserIsLoggedIn();
   document.addEventListener("user", async () => {
     await checkIfUserIsLoggedIn();
   });
 
-  // checkEvents();
-  // document.addEventListener("events", () => {
-  //   checkEvents();
-  // });
+  changeSelectOptions();
+  document.addEventListener("events", () => {
+    changeSelectOptions();
+  });
 
   const openLoginPageButton = document.getElementById("open-login-page");
   openLoginPageButton?.addEventListener("click", () => {
@@ -63,22 +65,17 @@ function setupPage() {
     urlParams.set("event", value);
     navigateTo(`/?${urlParams.toString()}`);
   });
-
-  // onAuthStateChanged(auth, async (user) => {
-  //   if (user) {
-  //     console.log("user found");
-  //     userStore.uid = user.uid;
-  //     events = await getEvents();
-  //     changeSelectOptions(events);
-  //     checkUrlParams();
-  //   } else {
-  //     console.log("not found user");
-  //     userStore.uid = null;
-  //   }
-  // });
 }
 
 async function checkIfUserIsLoggedIn() {
+  showOrHideContent();
+
+  if (userStore.uid) {
+    await getEvents();
+  }
+}
+
+function showOrHideContent() {
   const content = document.getElementById("content");
   const openLoginPageButton = document.getElementById("open-login-page");
   const signOutButton = document.getElementById("sign-out");
@@ -87,9 +84,6 @@ async function checkIfUserIsLoggedIn() {
     openLoginPageButton.hidden = true;
     signOutButton.hidden = false;
     content.hidden = false;
-    const events = await getEvents();
-    changeSelectOptions(events);
-    checkUrlParams();
   } else {
     openLoginPageButton.hidden = false;
     signOutButton.hidden = true;
@@ -97,13 +91,9 @@ async function checkIfUserIsLoggedIn() {
   }
 }
 
-function checkEvents() {}
-
 async function getEvents() {
-  const userId = auth.currentUser.uid;
-
+  const userId = userStore.uid;
   const dbRef = ref(db);
-
   const userEventsSnap = await get(child(dbRef, `users/${userId}/events`));
   const userEvents = userEventsSnap.val() || {};
 
@@ -112,27 +102,41 @@ async function getEvents() {
     promises.push(get(child(dbRef, `events/${eventKey}`)));
   });
 
-  const events = {};
   const eventsPromises = await Promise.all(promises);
+
+  const newEvents = {};
+
   eventsPromises.forEach((eventSnap) => {
     const event = eventSnap.val();
-    events[eventSnap.key] = event;
+    newEvents[eventSnap.key] = event;
   });
 
-  return events;
+  const thereIsNewEvent = Object.entries(newEvents).some(([eventKey, newEvent]) => {
+    const savedEvent = eventsStore.events[eventKey];
+    if (!savedEvent) return true;
+    if (!_.isEqual(newEvent, savedEvent)) return true;
+  });
+
+  if (thereIsNewEvent) {
+    eventsStore.events = newEvents;
+  }
 }
 
-function changeSelectOptions(events) {
+function changeSelectOptions() {
   const eventSelector = document.getElementById("event-selector");
   eventSelector.innerHTML = "<option value='default'>Seleccione un evento</option>";
 
-  Object.keys(events).forEach((eventId) => {
-    const event = events[eventId];
+  Object.keys(eventsStore.events).forEach((eventId) => {
+    const event = eventsStore.events[eventId];
+    if (!event) return;
+
     const option = document.createElement("option");
     option.value = eventId;
     option.innerText = event.name;
     eventSelector.appendChild(option);
   });
+
+  checkUrlParams();
 }
 
 function checkUrlParams() {
