@@ -25,6 +25,7 @@ const html = `
   <div id="create-transaction"></div>
   <div id="event-balance"></div>
   <div id="settle-debts"></div>
+  <div id="transactions"></div>
 </div>
 `;
 
@@ -215,6 +216,29 @@ function displayChosenEventInfo() {
   //     ${event.debts.map((debt) => `<li>${debt.from} le debe a ${debt.to} $${debt.amount}</li>`).join("")}
   //   </ul>
   // `;
+
+  const transactions = document.getElementById("transactions");
+  Object.values(event.transactions).forEach((transaction) => {
+    const container = document.createElement("div");
+
+    const title = document.createElement("h4");
+    title.innerHTML = transaction.name;
+    container.appendChild(title);
+
+    const amount = document.createElement("p");
+    amount.innerHTML = `Amount: $${transaction.amount}`;
+    container.appendChild(amount);
+
+    const whoPaid = document.createElement("p");
+    whoPaid.innerHTML = `Paid by: ${transaction.whoPaid}`;
+    container.appendChild(whoPaid);
+
+    const divideAmong = document.createElement("p");
+    divideAmong.innerHTML = `Divide among: ${transaction.divideAmong.join(", ")}`;
+    container.appendChild(divideAmong);
+
+    transactions.appendChild(container);
+  });
 }
 
 export default {
