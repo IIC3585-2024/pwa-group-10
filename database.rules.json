@@ -17,6 +17,13 @@
             "uid": { ".validate": "newData.isString()" }
           }
         },
+        "transactions": {
+          "$id": {
+            "name": { ".validate": "newData.isString()" },
+            "amount": { ".validate": "newData.isNumber()" },
+            "whoPaid": { ".validate": "newData.isString()" }
+          }
+        },
         "$other": { ".validate": false }
       }
     }

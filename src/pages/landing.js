@@ -8,20 +8,21 @@ import navigateTo from "../router";
 
 const html = `
 <div>
-  <button id="open-login-page">Iniciar Sesión</button>
-  <button id="sign-out" hidden>Cerrar Sesión</button>
+  <button id="open-login-page">Log In</button>
+  <button id="sign-out" hidden>Log Out</button>
 </div>
 <div>
   <h1>Splittypie</h1>
 </div>
 <div id="content" hidden>
   <select name="event" id="event-selector">
-    <option value="default">Seleccione un evento</option>
+    <option value="default">Choose an event</option>
   </select>
-  <button id="create-event">Nuevo Evento</button>
+  <button id="create-event">Create Event</button>
   <br />
 
   <h3 id="event-name"></h3>
+  <div id="create-transaction"></div>
   <div id="event-balance"></div>
   <div id="settle-debts"></div>
 </div>
@@ -126,7 +127,7 @@ async function getEvents() {
 
 function changeSelectOptions() {
   const eventSelector = document.getElementById("event-selector");
-  eventSelector.innerHTML = "<option value='default'>Seleccione un evento</option>";
+  eventSelector.innerHTML = "<option value='default'>Select an event</option>";
 
   Object.keys(eventsStore.events).forEach((eventId) => {
     const event = eventsStore.events[eventId];
@@ -186,6 +187,14 @@ function displayChosenEventInfo() {
   if (!event) return;
 
   eventName.innerText = event.name;
+
+  const createTransaction = document.getElementById("create-transaction");
+  const createTransactionButton = document.createElement("button");
+  createTransactionButton.innerHTML = "Create Transaction";
+  createTransactionButton.addEventListener("click", () => {
+    navigateTo(`/transaction?event=${eventId}`);
+  });
+  createTransaction.appendChild(createTransactionButton);
 
   const eventBalance = document.getElementById("event-balance");
 

@@ -2,6 +2,7 @@ import landingPage from "./pages/landing";
 import loginPage from "./pages/login";
 import eventPage from "./pages/event";
 import whoAreYouPage from "./pages/whoAreYou";
+import transactionPage from "./pages/transaction";
 
 const routes = {
   "/404": {
@@ -12,6 +13,7 @@ const routes = {
   "/login": loginPage,
   "/event": eventPage,
   "/who-are-you": whoAreYouPage,
+  "/transaction": transactionPage,
 };
 
 function navigateTo(href) {
