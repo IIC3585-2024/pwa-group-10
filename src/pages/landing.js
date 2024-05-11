@@ -178,7 +178,6 @@ function displayChosenEventInfo() {
   const eventId = eventSelector.value;
 
   const eventName = document.getElementById("event-name");
-  console.log("eventId", eventId);
   if (eventId === "default") {
     eventName.innerHTML = "Choose an event";
     return;
@@ -187,9 +186,12 @@ function displayChosenEventInfo() {
   const event = eventsStore.events[eventId];
   if (!event) return;
 
+  computeBalances(event);
+
   eventName.innerText = event.name;
 
   const createTransaction = document.getElementById("create-transaction");
+  createTransaction.innerHTML = "";
   const createTransactionButton = document.createElement("button");
   createTransactionButton.innerHTML = "Create Transaction";
   createTransactionButton.addEventListener("click", () => {
@@ -198,7 +200,7 @@ function displayChosenEventInfo() {
   createTransaction.appendChild(createTransactionButton);
 
   const eventBalance = document.getElementById("event-balance");
-
+  eventBalance.innerHTML = "";
   const balanceTitle = document.createElement("h4");
   balanceTitle.innerHTML = "Individual Balance";
   eventBalance.appendChild(balanceTitle);
@@ -209,16 +211,17 @@ function displayChosenEventInfo() {
     eventBalance.appendChild(participantBalance);
   });
 
-  // const settleDebts = document.getElementById("settle-debts");
-  // settleDebts.innerHTML = `
-  //   <h3>Debts:</h3>
-  //   <ul>
-  //     ${event.debts.map((debt) => `<li>${debt.from} le debe a ${debt.to} $${debt.amount}</li>`).join("")}
-  //   </ul>
-  // `;
+  const settleDebts = document.getElementById("settle-debts");
+  settleDebts.innerHTML = `
+    <h4>Debts:</h4>
+    <ul>
+      ${event.debts.map((debt) => `<li>${debt.from} owes ${debt.to} $${debt.amount}</li>`).join("")}
+    </ul>
+  `;
 
   const transactions = document.getElementById("transactions");
-  Object.values(event.transactions).forEach((transaction) => {
+  transactions.innerHTML = "";
+  Object.values(event.transactions || {}).forEach((transaction) => {
     const container = document.createElement("div");
 
     const title = document.createElement("h4");
@@ -239,6 +242,75 @@ function displayChosenEventInfo() {
 
     transactions.appendChild(container);
   });
+}
+
+function computeBalances(event) {
+  event.participants.forEach((participant) => {
+    participant.balance = 0;
+  });
+
+  event.debts = [];
+
+  Object.values(event.transactions || {}).forEach((transaction) => {
+    const amountPerPerson = transaction.amount / transaction.divideAmong.length;
+
+    transaction.divideAmong.forEach((participant) => {
+      const participantIndex = event.participants.findIndex((p) => p.name === participant);
+      event.participants[participantIndex].balance -= amountPerPerson;
+    });
+
+    const whoPaidIndex = event.participants.findIndex((p) => p.name === transaction.whoPaid);
+    event.participants[whoPaidIndex].balance += transaction.amount;
+  });
+
+  const negativeParticipants = event.participants.filter((p) => p.balance < 0);
+  const positiveParticipants = event.participants.filter((p) => p.balance > 0);
+
+  let [i, j] = [0, 0];
+  let debtorBalance = 0;
+  let indebtedToBalance = 0;
+
+  while (i < negativeParticipants.length && j < positiveParticipants.length) {
+    if (debtorBalance === 0) {
+      debtorBalance = Math.round(Math.abs(negativeParticipants[i].balance));
+    }
+    if (indebtedToBalance === 0) {
+      indebtedToBalance = Math.round(positiveParticipants[j].balance);
+    }
+
+    if (debtorBalance <= indebtedToBalance) {
+      const debt = {
+        from: negativeParticipants[i].name,
+        to: positiveParticipants[j].name,
+        amount: debtorBalance,
+      };
+
+      indebtedToBalance -= debtorBalance;
+      debtorBalance -= debtorBalance;
+
+      event.debts.push(debt);
+
+      debtorBalance = 0;
+    } else if (debtorBalance > indebtedToBalance) {
+      const debt = {
+        from: negativeParticipants[i].name,
+        to: positiveParticipants[j].name,
+        amount: indebtedToBalance,
+      };
+
+      debtorBalance -= indebtedToBalance;
+      indebtedToBalance -= indebtedToBalance;
+
+      event.debts.push(debt);
+    }
+
+    if (debtorBalance === 0) {
+      i++;
+    }
+    if (indebtedToBalance === 0) {
+      j++;
+    }
+  }
 }
 
 export default {
