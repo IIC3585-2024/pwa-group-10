@@ -1,5 +1,7 @@
 import { auth } from "./firebase";
 import { onAuthStateChanged } from "firebase/auth";
+import { saveEvent, getEvents } from './indexedDB';
+
 
 function store(data = {}, name = "store") {
   function emit(type, detail) {
@@ -39,12 +41,29 @@ function store(data = {}, name = "store") {
 const userStore = store({ uid: null }, "user");
 const eventsStore = store({ events: {} }, "events");
 
-onAuthStateChanged(auth, (user) => {
+onAuthStateChanged(auth, async (user) => {
   console.log("onAuthStateChanged", user);
   userStore.uid = user ? user.uid : null;
-  if (!userStore.uid) {
+  if (userStore.uid) {
+    eventsStore.events = await getEvents();
+  } else {
     eventsStore.events = {};
   }
 });
 
-export { userStore, eventsStore };
+async function addOrUpdateEvent(event) {
+  try {
+    await saveEvent(event); 
+    eventsStore.events[event.id] = event; 
+    emit('eventsUpdated', eventsStore.events); 
+  } catch (error) {
+    console.error('Error saving event:', error);
+  }
+}
+
+async function refreshEvents() {
+  eventsStore.events = await getEvents(); 
+  emit('eventsRefreshed', eventsStore.events); 
+}
+
+export { userStore, eventsStore, addOrUpdateEvent, refreshEvents };
