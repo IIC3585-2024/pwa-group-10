@@ -10,6 +10,7 @@
     "deploy": "vite build src && firebase deploy --only hosting"
   },
   "devDependencies": {
+    "tailwindcss": "^3.4.3",
     "vite": "^5.2.0"
   },
   "dependencies": {
