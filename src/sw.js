@@ -16,6 +16,12 @@ self.addEventListener('install', function(event) {
           '/src/pages/event.js',
           '/src/pages/whoAreYou.js',
           '/src/pages/transaction.js',
+          'src/icons/icon-72x72.png',
+          'src/icons/icon-96x96.png',
+          'src/icons/icon-128x128.png',
+          'src/icons/icon-144x144.png',
+          'src/icons/icon-192x192.png',
+          'src/icons/icon-256x256.png'
         ]);
       } catch (error) {
         console.error('Failed to install the service worker:', error);
