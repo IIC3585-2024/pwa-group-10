@@ -1,12 +1,11 @@
 :root {
-  --primary-color: #646cff;
-  --hover-color: #535bf2;
-  --background-color: #f4f4f9;
-  --text-color: #213547;
-  --input-background: #ffffff;
-  --border-color: #cccccc;
+  --primary-color: #5a67d8;  /* Un azul más suave que el original */
+  --hover-color: #434190;  /* Un azul más oscuro para el hover */
+  --background-color: #f7f7f8;  /* Un fondo más claro para más contraste */
+  --text-color: #2d3748;  /* Un gris oscuro para mejorar la legibilidad */
+  --input-background: #ffffff;  /* Fondo blanco para los inputs para claridad */
+  --border-color: #e2e8f0;  /* Un gris claro para los bordes */
 }
-
 body {
   font-family: 'Inter', sans-serif;
   background-color: var(--background-color);
@@ -67,3 +66,34 @@ button:hover {
     width: calc(100% - 2em); /* Adjust for padding */
   }
 }
+
+#event-selector{
+  width: 500px; /* Ajusta el ancho para que sea más grande y consistente */
+  padding: 12px 20px; /* Aumenta el padding para un mejor manejo */
+  margin: 10px auto; /* Centra los elementos y agrega espacio entre ellos */
+  display: block; /* Asegura que cada elemento se muestre en su propia línea */
+  font-size: 1em; /* Aumenta el tamaño de la fuente para mejorar la legibilidad */
+  border-radius: 8px; /* Añade bordes redondeados para un aspecto más moderno */
+  border: 1px solid #535bf2; /* Añade un borde sutil */
+}
+
+.transaction-container {
+  background-color: var(--background-color);
+  border: 1px solid var(--border-color);
+  padding: 10px;
+  margin-top: 10px;
+  cursor: pointer;
+}
+
+.transaction-details {
+  display: none;
+  padding: 8px;
+  background-color: #ffffff;
+  border-top: 1px solid var(--border-color);
+}
+
+.transaction-container:hover {
+  background-color: var(--hover-color);
+  color: #868bf0;
+}
+

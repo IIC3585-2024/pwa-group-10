@@ -18,6 +18,7 @@ const html = `
   <select name="event" id="event-selector">
     <option value="default">Choose an event</option>
   </select>
+  <br />
   <button id="create-event">Create Event</button>
   <br />
 
@@ -146,20 +147,25 @@ function changeSelectOptions() {
 function checkUrlParams() {
   const urlParams = new URLSearchParams(window.location.search);
   const eventId = urlParams.get("event");
-
+  const createEventButton = document.getElementById("create-event");
+  const eventSelector = document.getElementById("event-selector");
   if (!eventId) {
+    eventSelector.value = 'default';
+    createEventButton.style.display = 'block';
     displayChosenEventInfo();
     return;
   }
 
-  const eventSelector = document.getElementById("event-selector");
+  
   for (const option of eventSelector.options) {
     if (option.value === eventId) {
+      createEventButton.style.display = 'none'; 
       option.selected = true;
       displayChosenEventInfo();
       return;
     }
   }
+  createEventButton.style.display = 'block';
 }
 
 function redirectIfEventNotFromUser() {
@@ -170,6 +176,15 @@ function redirectIfEventNotFromUser() {
   console.log("eventsStore", eventsStore.events);
   if (!eventsStore.events[eventId] && userStore.uid) {
     navigateTo(`/who-are-you?${urlParams.toString()}`);
+  }
+}
+
+function toggleTransactionDetails(event) {
+  const detailsElement = event.currentTarget.nextElementSibling;
+  if (detailsElement.style.display === "none" || !detailsElement.style.display) {
+    detailsElement.style.display = "block";
+  } else {
+    detailsElement.style.display = "none";
   }
 }
 
@@ -221,28 +236,28 @@ function displayChosenEventInfo() {
 
   const transactions = document.getElementById("transactions");
   transactions.innerHTML = "";
-  Object.values(event.transactions || {}).forEach((transaction) => {
+  Object.values(event.transactions || {}).forEach(transaction => {
     const container = document.createElement("div");
+    container.className = "transaction-container";
 
     const title = document.createElement("h4");
     title.innerHTML = transaction.name;
+    title.onclick = toggleTransactionDetails; // Evento para expandir/colapsar
     container.appendChild(title);
 
-    const amount = document.createElement("p");
-    amount.innerHTML = `Amount: $${transaction.amount}`;
-    container.appendChild(amount);
-
-    const whoPaid = document.createElement("p");
-    whoPaid.innerHTML = `Paid by: ${transaction.whoPaid}`;
-    container.appendChild(whoPaid);
-
-    const divideAmong = document.createElement("p");
-    divideAmong.innerHTML = `Divide among: ${transaction.divideAmong.join(", ")}`;
-    container.appendChild(divideAmong);
+    const details = document.createElement("div");
+    details.className = "transaction-details";
+    details.innerHTML = `
+      <p>Amount: $${transaction.amount}</p>
+      <p>Paid by: ${transaction.whoPaid}</p>
+      <p>Divide among: ${transaction.divideAmong.join(", ")}</p>
+    `;
+    container.appendChild(details);
 
     transactions.appendChild(container);
   });
 }
+
 
 function computeBalances(event) {
   event.participants.forEach((participant) => {
