@@ -42,6 +42,8 @@ onAuthStateChanged(auth, async (user) => {
     token: token,
     timestamp: Date.now(),
   });
+
+  console.log("token registered", token);
 });
 
 export { auth, db, msg };
