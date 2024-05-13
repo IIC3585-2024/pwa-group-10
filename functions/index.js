@@ -36,10 +36,9 @@ exports.notificationWhenTransactionCreated = onValueCreated(
     });
 
     const payload = {
-      notification: {
+      data: {
         title: `New Transaction in Event ${eventName}`,
         body: `New transaction ${transaction.name} of $${transaction.amount}`,
-        // icon: "",
       },
       webpush: {
         fcmOptions: {
