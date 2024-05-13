@@ -1,19 +1,63 @@
-/**
- * Import function triggers from their respective submodules:
- *
- * const {onCall} = require("firebase-functions/v2/https");
- * const {onDocumentWritten} = require("firebase-functions/v2/firestore");
- *
- * See a full list of supported triggers at https://firebase.google.com/docs/functions
- */
+const admin = require("firebase-admin");
+const { onValueCreated } = require("firebase-functions/v2/database");
 
-const {onRequest} = require("firebase-functions/v2/https");
-const logger = require("firebase-functions/logger");
+admin.initializeApp();
 
-// Create and deploy your first functions
-// https://firebase.google.com/docs/functions/get-started
+const db = admin.database();
 
-// exports.helloWorld = onRequest((request, response) => {
-//   logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
+exports.notificationWhenTransactionCreated = onValueCreated(
+  "events/{eventId}/transactions/{transactionId}",
+  async (event) => {
+    const transaction = event.data.val();
+
+    const eventId = event.params.eventId;
+
+    const eventSnap = await db.ref(`events/${eventId}`).once("value");
+    const eventData = eventSnap.val();
+
+    const eventName = eventData.name;
+    const participants = eventData.participants;
+
+    const usersToNotify = participants.filter((p) => p.uid && p.name !== transaction.whoPaid).map((p) => p.uid);
+
+    const userPromises = [];
+    usersToNotify.forEach((uid) => {
+      userPromises.push(db.ref(`users/${uid}`).once("value"));
+    });
+
+    const users = await Promise.all(userPromises);
+
+    const registrationTokens = [];
+    users.forEach((userSnap) => {
+      const user = userSnap.val();
+      Object.keys(user.tokens).forEach((token) => {
+        registrationTokens.push(token);
+      });
+    });
+
+    const payload = {
+      notification: {
+        title: `New Transaction in Event ${eventName}`,
+        body: `New transaction ${transaction.name} of $${transaction.amount}`,
+        // icon: "",
+      },
+      webpush: {
+        fcmOptions: {
+          link: `https://slittypie-iic3585.web.app/?event=${eventId}`,
+        },
+      },
+    };
+
+    console.log("payload", payload);
+    console.log("registrationTokens", registrationTokens);
+
+    const promises = [];
+    registrationTokens.forEach((token) => {
+      const sendMessage = admin.messaging().send({ ...payload, token });
+      promises.push(sendMessage);
+    });
+
+    const responses = await Promise.all(promises);
+    console.log("responses", responses);
+  }
+);
