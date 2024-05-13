@@ -50,9 +50,11 @@ async function setupPage() {
     return;
   }
 
-  const participantsSnap = await get(ref(db, `events/${eventId}/participants`));
-  const participants = participantsSnap.val() || [];
- // const participants = [];
+  let participants = [];
+  if (navigator.onLine) {
+    const participantsSnap = await get(ref(db, `events/${eventId}/participants`));
+    participants = participantsSnap.val() || [];
+  }
 
   const whoPaidSelector = document.getElementById("who-paid");
   whoPaidSelector.innerHTML = "<option value='default'>Select who paid</option>";
