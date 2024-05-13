@@ -1,7 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { getDatabase, ref, set } from "firebase/database";
-import { getMessaging, getToken } from "firebase/messaging";
+import { getMessaging, getToken, onMessage } from "firebase/messaging";
 
 const firebaseConfig = {
   apiKey: "AIzaSyABfLu3f-Lmngcvka3i8-XTjdZOEuFDzQY",
@@ -44,6 +44,10 @@ onAuthStateChanged(auth, async (user) => {
   });
 
   console.log("token registered", token);
+
+  onMessage(msg, (payload) => {
+    console.log("Message received. ", payload);
+  });
 });
 
 export { auth, db, msg };
