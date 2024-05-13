@@ -52,6 +52,7 @@ async function setupPage() {
 
   const participantsSnap = await get(ref(db, `events/${eventId}/participants`));
   const participants = participantsSnap.val() || [];
+ // const participants = [];
 
   const whoPaidSelector = document.getElementById("who-paid");
   whoPaidSelector.innerHTML = "<option value='default'>Select who paid</option>";
