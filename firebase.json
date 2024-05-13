@@ -25,7 +25,7 @@
     "singleProjectMode": true
   },
   "hosting": {
-    "public": "src/dist",
+    "public": "src/",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "rewrites": [
       {
